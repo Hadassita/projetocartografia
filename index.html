@@ -34,6 +34,8 @@
 
         .info-card h1 { margin: 0 0 5px 0; font-size: 22px; color: #333; }
         .info-card p { margin: 0; font-size: 14px; color: #666; }
+        .info-card .autoria { margin-top: 8px; font-size: 12px; color: #777; }
+        .info-card .autoria a { color: #444; }
 
         /* Instruções */
         .controls-hint {
@@ -79,7 +81,9 @@
         shadow-softness="0.2"
         exposure="0.9"
         environment-image="neutral"
-        camera-orbit="45deg 75deg 800m"> <div class="progress-bar" slot="progress-bar">
+        field-of-view="30deg"
+        interaction-prompt="none">
+        <div class="progress-bar" slot="progress-bar">
             <div class="update-bar"></div>
         </div>
 
@@ -88,6 +92,7 @@
     <div class="info-card">
         <h1>Malha Urbana 3D</h1>
         <p>Teresina - PI</p>
+        <p class="autoria">por <a href="https://github.com/Hadassita">Hadassa Fontes</a> · Eng. Mecânica UFPI</p>
     </div>
 
     <div class="controls-hint">
@@ -102,6 +107,19 @@
           const {totalProgress} = event.detail;
           progress.classList.toggle('hide', totalProgress === 1);
           bar.style.width = `${totalProgress * 100}%`;
+        });
+
+        // Enquadra a câmera no terreno (a caixa do modelo é bem mais alta que a malha,
+        // então o alvo automático deixava o modelo cortado na parte de baixo da tela)
+        modelViewer.addEventListener('load', () => {
+          const centro = modelViewer.getBoundingBoxCenter();
+          const dim = modelViewer.getDimensions();
+          const proporcao = modelViewer.clientWidth / modelViewer.clientHeight;
+          const ajusteTela = Math.min(2.5, Math.max(1, (16 / 9) / proporcao));
+          const raio = Math.max(dim.x, dim.z) * 1.25 * ajusteTela;
+          modelViewer.cameraTarget = `${centro.x}m ${centro.y - dim.y / 2}m ${centro.z}m`;
+          modelViewer.cameraOrbit = `45deg 55deg ${raio}m`;
+          modelViewer.jumpCameraToGoal();
         });
     </script>
 </body>
